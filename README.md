@@ -3,7 +3,7 @@
 펫테크 스타트업에서 5년간 백엔드를 만들고 운영해 온 개발자입니다.
 펄송(2021.09 ~ 2023.12)에서 시작했고, 펄송을 인수한 온힐(2024.01 ~ 현재)에서 온힐 서비스와 펄송 서비스를 함께 맡고 있습니다.
 IoT 센서 로그 수집부터 정기구독 결제, 인앱결제, AI 상담까지 서비스의 서버 전 영역을 다뤄 왔고,
-요즘은 NestJS · Prisma · PostgreSQL 기반 실시간 매칭 서비스를 혼자 설계하고 있습니다.
+요즘은 NestJS · Prisma · PostgreSQL 기반 실시간 매칭 서비스를 혼자 설계하면서, M1 Mac mini 홈서버를 Terraform · Argo CD로 코드화하는 홈랩을 만들고 있습니다.
 
 - 🧭 **주력**: TypeScript / Node.js 백엔드 (GraphQL · REST), MySQL · PostgreSQL, Redis
 - ☁️ **운영**: Docker · GitHub Actions · AWS ECS/ECR 배포 파이프라인을 직접 구축하고 서비스를 5년간 안정 운영
@@ -42,6 +42,11 @@ IoT 센서 로그 수집부터 정기구독 결제, 인앱결제, AI 상담까�
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)
 ![PM2](https://img.shields.io/badge/PM2-2B037A?style=flat-square&logo=pm2&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase_FCM-DD2C00?style=flat-square&logo=firebase&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-844FBA?style=flat-square&logo=terraform&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes_(k3s)-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
+![Argo CD](https://img.shields.io/badge/Argo_CD-EF7B4D?style=flat-square&logo=argo&logoColor=white)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=flat-square&logo=cloudflare&logoColor=white)
+![Tailscale](https://img.shields.io/badge/Tailscale-242424?style=flat-square&logo=tailscale&logoColor=white)
 
 **Frontend (필요할 때)**
 
@@ -125,6 +130,18 @@ IoT 센서 로그 수집부터 정기구독 결제, 인앱결제, AI 상담까�
 - **AI 벡터 매칭**: AWS Bedrock으로 자기소개 속성 추출 → Cohere 임베딩 5벡터 → pgvector HNSW 재랭킹, 방향성 상호 적합도 tier 랭킹과 30분 배치 워커로 비동기 재구축
 - AWS Rekognition Face Liveness · 신분증 대조 · OCR 본인확인, Apple / Google 인앱결제와 포인트 원장, 커플 상태 머신(HOLD 24h TTL 조건부 전이), Redlock 분산 락 크론
 - 온보딩 문서 10편과 Apidog OpenAPI 패치로 앱 팀과 API 계약 동기화, Conventional Commits
+
+### 🏠 homelab-gitops (개인 프로젝트, 2026.10 ~ 진행 중)
+
+M1 Mac mini 위에 Lima(arm64 Ubuntu VM) + k3s 클러스터를 올리고, Terraform · Argo CD · Authentik SSO로 전 구성을 코드화하는 홈랩. "레포에 없는 설정은 존재하지 않는다"를 원칙으로 호스트 · 외부 자원 · 클러스터 워크로드를 모두 코드로 관리합니다.
+
+- **Stack**: Lima · k3s · Terraform 1.17 · Cloudflare(DNS, R2, Tunnel) · Tailscale · Argo CD · Authentik · Traefik · cert-manager · SOPS + age · Helm · Kustomize · launchd
+- **역할 경계**: 호스트 설정은 멱등 스크립트, 클러스터 밖 자원은 Terraform, 클러스터 안 워크로드는 GitOps로 분리하고, Terraform이 클러스터 안을 직접 건드리지 않도록 선을 그었습니다
+- **ADR 12건**: K8s 실행 방식(Lima vs Colima vs Talos), GitOps 컨트롤러(Argo CD vs Flux), IdP(Authentik vs Keycloak), 시크릿(SOPS vs External Secrets), 상태 백엔드(R2 vs HCP Terraform) 등을 대안과 이유를 남기며 결정
+- **멱등 호스트 부트스트랩**: pmset 전원 설정, macOS 자동 업데이트 차단, SSH 키 인증 강제, Brewfile, Lima VM 생성, kubeconfig를 Tailscale MagicDNS 주소로 재작성, launchd 등록까지 스크립트 한 번으로 처리
+- **Lima VM 정의**: 4 CPU / 10GiB / 100GiB 자원 배분, 80/443/6443 포트포워딩, k3s provision, Tailscale 주소를 API 인증서 SAN에 주입, kubeconfig 권한 그룹 단위 최소화
+- **상태 · 시크릿**: Terraform 원격 상태를 Cloudflare R2(S3 호환, use_lockfile)에 루트별 key로 분리, mise 버전 고정, direnv 자격 증명 주입, tfstate · kubeconfig · age 키는 .gitignore로 차단
+- **다음 단계**: Cloudflare DNS · Tailscale ACL · Argo CD app-of-apps를 Terraform으로, cert-manager DNS-01 와일드카드 인증서, KSOPS, Authentik OIDC(Argo CD · Grafana) + forward auth, kube-prometheus-stack + Loki, Velero 백업 리허설, Renovate · kubeconform · trivy CI
 
 ### ☁️ 이커머스 AWS 인프라 · 비용 운영 (푸드나무 · 온힐 계열사, 2025.09 ~ 2026.09)
 
