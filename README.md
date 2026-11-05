@@ -147,9 +147,9 @@ M1 Mac mini 위에 Lima(arm64 Ubuntu VM) + k3s 클러스터를 올리고, Terraf
 
 온힐 소속으로 계열사인 식품 이커머스 운영사의 AWS 인프라 운영과 IT 비용 관리를 맡았습니다.
 
-- EC2 약 90대 · ALB 42대 · NAT GW 5대 · Aurora RI 3대 규모 계정의 비용 구조를 전수 분석하고, MSP 위탁 운영을 해지해 직접 운영 체제로 전환
-- 파트너 이용내역서와 AWS 청구서를 시간 단위로 대조 검증, Savings Plan · RI 약정 현황 정리
-- WAF · VPN · CDN · 알림톡 등 월 10여 개 IT 비용 항목 지출결의와 계약 검토, Java/Spring 레거시 모놀리스 환경 파악과 후임 인수인계
+- EC2 수십 대 규모 AWS 계정의 비용 구조를 전수 분석하고, AWS 파트너사를 변경해 비용 구조 최적화
+- 파트너사 변경 시점의 기존 파트너 이용내역서와 AWS 청구서를 시간 단위로 대조 검증, Savings Plan · RI 약정 현황 정리
+- WAF · VPN · CDN · 알림톡 등 월 10여 개 IT 비용 항목 지출결의와 계약 검토, Java/Spring · PostgreSQL 레거시 모놀리스 환경 파악과 후임 인수인계
 
 ---
 
