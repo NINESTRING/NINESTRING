@@ -3,7 +3,7 @@
 펫테크 스타트업에서 5년간 백엔드를 만들고 운영해 온 개발자입니다.
 펄송(2021.09 ~ 2023.12)에서 시작했고, 펄송을 인수한 온힐(2024.01 ~ 현재)에서 온힐 서비스와 펄송 서비스를 함께 맡고 있습니다.
 IoT 센서 로그 수집부터 정기구독 결제, 인앱결제, AI 상담까지 서비스의 서버 전 영역을 다뤄 왔고,
-요즘은 NestJS · Prisma · PostgreSQL 기반 실시간 매칭 서비스를 혼자 설계하면서, M1 Mac mini 홈서버를 Terraform · Argo CD로 코드화하는 홈랩을 만들고 있습니다.
+요즘은 NestJS · Prisma · PostgreSQL 기반 실시간 매칭 서비스를 혼자 설계하면서, M1 Mac mini 홈서버를 Terraform · Argo CD로 코드화한 홈랩을 운영하고 있습니다.
 
 - 🧭 **주력**: TypeScript / Node.js 백엔드 (GraphQL · REST), MySQL · PostgreSQL, Redis
 - ☁️ **운영**: Docker · GitHub Actions · AWS ECS/ECR 배포 파이프라인을 직접 구축하고 서비스를 5년간 안정 운영
@@ -131,17 +131,19 @@ IoT 센서 로그 수집부터 정기구독 결제, 인앱결제, AI 상담까�
 - AWS Rekognition Face Liveness · 신분증 대조 · OCR 본인확인, Apple / Google 인앱결제와 포인트 원장, 커플 상태 머신(HOLD 24h TTL 조건부 전이), Redlock 분산 락 크론
 - 온보딩 문서 10편과 Apidog OpenAPI 패치로 앱 팀과 API 계약 동기화, Conventional Commits
 
-### 🏠 homelab-gitops (개인 프로젝트, 2026.10 ~ 진행 중)
+### 🏠 homelab-gitops (개인 프로젝트, 2026.11 ~ 진행 중)
 
-M1 Mac mini 위에 Lima(arm64 Ubuntu VM) + k3s 클러스터를 올리고, Terraform · Argo CD · Authentik SSO로 전 구성을 코드화하는 홈랩. "레포에 없는 설정은 존재하지 않는다"를 원칙으로 호스트 · 외부 자원 · 클러스터 워크로드를 모두 코드로 관리합니다.
+M1 Mac mini 한 대에 Lima(arm64 Ubuntu VM) + k3s 단일 노드 Kubernetes 플랫폼을 구축하고, 호스트 설정부터 앱 배포까지 전 과정을 코드로 관리하는 홈랩. "레포에 없는 설정은 존재하지 않는다"를 원칙으로 삼았습니다.
 
-- **Stack**: Lima · k3s · Terraform 1.17 · Cloudflare(DNS, R2, Tunnel) · Tailscale · Argo CD · Authentik · Traefik · cert-manager · SOPS + age · Helm · Kustomize · launchd
-- **역할 경계**: 호스트 설정은 멱등 스크립트, 클러스터 밖 자원은 Terraform, 클러스터 안 워크로드는 GitOps로 분리하고, Terraform이 클러스터 안을 직접 건드리지 않도록 선을 그었습니다
-- **ADR 12건**: K8s 실행 방식(Lima vs Colima vs Talos), GitOps 컨트롤러(Argo CD vs Flux), IdP(Authentik vs Keycloak), 시크릿(SOPS vs External Secrets), 상태 백엔드(R2 vs HCP Terraform) 등을 대안과 이유를 남기며 결정
-- **멱등 호스트 부트스트랩**: pmset 전원 설정, macOS 자동 업데이트 차단, SSH 키 인증 강제, Brewfile, Lima VM 생성, kubeconfig를 Tailscale MagicDNS 주소로 재작성, launchd 등록까지 스크립트 한 번으로 처리
-- **Lima VM 정의**: 4 CPU / 10GiB / 100GiB 자원 배분, 80/443/6443 포트포워딩, k3s provision, Tailscale 주소를 API 인증서 SAN에 주입, kubeconfig 권한 그룹 단위 최소화
-- **상태 · 시크릿**: Terraform 원격 상태를 Cloudflare R2(S3 호환, use_lockfile)에 루트별 key로 분리, mise 버전 고정, direnv 자격 증명 주입, tfstate · kubeconfig · age 키는 .gitignore로 차단
-- **다음 단계**: Cloudflare DNS · Tailscale ACL · Argo CD app-of-apps를 Terraform으로, cert-manager DNS-01 와일드카드 인증서, KSOPS, Authentik OIDC(Argo CD · Grafana) + forward auth, kube-prometheus-stack + Loki, Velero 백업 리허설, Renovate · kubeconform · trivy CI
+- **Stack**: Lima · k3s · Terraform · Argo CD · Authentik · Traefik · cert-manager · external-dns · SOPS + age · KSOPS · kube-prometheus-stack · Loki · Alloy · Velero · Cloudflare(DNS, R2, Tunnel) · Tailscale · GitHub Actions · Renovate
+- **재현 가능한 인프라**: 멱등 부트스트랩 스크립트, Terraform 3개 계층(DNS/네트워크, 클러스터 부트스트랩, SSO), Argo CD ApplicationSet으로 구성. 클러스터를 삭제하고 재구축하는 리허설에서 약 8분 만에 12개 앱과 SSO 데이터를 모두 복구
+- **GitOps 배포**: 디렉터리 하나를 추가하면 Argo CD Application으로 자동 등록되는 구조. 새 앱은 PR 하나로 TLS, DNS, 로그인, 대시보드 등록까지 완료
+- **SSO**: Authentik을 도입해 Argo CD와 Grafana는 OIDC로, OIDC를 지원하지 않는 앱은 Traefik forward auth로 보호. 프로바이더와 앱 설정은 Terraform으로 관리하고 로컬 관리자 계정은 비활성화
+- **시크릿 · 네트워크**: 모든 자격 증명을 SOPS(age)로 암호화해 Git에 보관하고 KSOPS로 복호화. 내부 서비스는 Tailscale로만 접근하고 공개 사이트만 Cloudflare Tunnel로 노출. Let's Encrypt 와일드카드 인증서(DNS-01)와 external-dns로 TLS와 DNS를 자동화
+- **관측 · 백업**: kube-prometheus-stack, Loki, Alloy로 메트릭과 로그를 수집하고 Alertmanager 알림을 Telegram으로 전송. Velero로 Cloudflare R2에 매일 백업하고 복구 리허설로 검증
+- **CI · 의존성 관리**: GitHub Actions로 매니페스트 렌더링, kubeconform 스키마 검사, arm64 이미지 존재 확인, Trivy 취약점 스캔을 수행. Renovate로 Helm 차트, 이미지, Terraform provider 갱신 PR 자동화를 구성
+- **운영 문서화**: ADR 12건으로 기술 선택(Lima vs Colima vs Talos, Argo CD vs Flux, Authentik vs Keycloak 등)의 대안과 이유를 남기고, 장애 대응 · 재부팅 · 전체 재구축 · 잠금 복구 절차를 런북으로 작성해 재구축 리허설로 검증
+- **트러블슈팅**: OOM kill 없이 503을 내던 Grafana를 cgroup memory.events와 refault 지표로 추적해 메모리 제한(384Mi)에서의 페이지 캐시 스래싱을 원인으로 확인하고 1Gi로 조정. amd64 전용 이미지로 인한 arm64 호환성 문제는 버전 고정 후 CI 검사로 사전 차단
 
 ### ☁️ 이커머스 AWS 인프라 · 비용 운영 (푸드나무 · 온힐 계열사, 2025.09 ~ 2026.09)
 
